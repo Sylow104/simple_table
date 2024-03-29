@@ -9,7 +9,7 @@ export interface column<T>
 {
 	label : string;
 	accessor : ((obj : T) => any);
-	comparator? : ((a : any, b : any) => number);
+	comparator? : ((a : T, b : T) => number);
 	// add sort function?
 	// add filter function?
 };
