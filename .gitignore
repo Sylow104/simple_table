@@ -1,0 +1,7 @@
+*.*
+!LICENSE
+!README.md
+!*.ts
+!*.html
+!webpack.config.js
+!.gitignore
