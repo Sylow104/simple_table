@@ -103,7 +103,6 @@ export class table<T>
 		this._header = document.createElement(`thead`);
 		this._main.insertAdjacentElement(`afterbegin`, this._body);
 		this._main.insertAdjacentElement(`afterbegin`, this._header);
-		this._columns = [];
 		this._tree_accessor = tree_accessor;
 	};
 
@@ -126,7 +125,6 @@ export class table<T>
 
 	paint()
 	{
-		this._main.style.cssText = this._style;
 		this.paint_header();
 		this.paint_body();
 	};
@@ -197,7 +195,6 @@ export class table<T>
 	private _main : HTMLTableElement;
 	private _header : HTMLTableSectionElement;
 	private _body : HTMLTableSectionElement;
-	private _style : string;
 	private _cell_style : string;
 	private _columns : column<T>[];
 	private _max_per_page : number;
