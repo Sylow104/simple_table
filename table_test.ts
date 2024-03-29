@@ -33,7 +33,7 @@ function init()
 			return `${q.a}`;
 		},
 		comparator : (a, b) => {
-			return b._data.a - a._data.a;
+			return a._data.a - b._data.a;
 		}
 	}, {
 		label : `world`,
@@ -41,7 +41,7 @@ function init()
 			return q.q;
 		},
 		comparator : (a, b) => {
-			return 0;
+			return a._data.q.localeCompare(b._data.q);
 		}
 	}];
 	tbl.data = to_use;
