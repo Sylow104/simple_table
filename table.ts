@@ -8,8 +8,8 @@
 export interface column<T>
 {
 	label : string;
-	accessor : ((obj : T) => string);
-	comparator : ((a : any, b : any) => number);
+	accessor : ((obj : T) => any);
+	comparator? : ((a : any, b : any) => number);
 	// add sort function?
 	// add filter function?
 };
@@ -28,7 +28,7 @@ export class table<T>
 		this._columns = [];
 	};
 
-	add_column(info : column<T>)
+	add_column<U>(info : column<T>)
 	{
 		this._columns.push(info);
 	};
@@ -78,6 +78,8 @@ export class table<T>
 		let row : HTMLTableRowElement;
 		let cell : HTMLTableCellElement;
 		this._data.forEach((v, i, a) => {
+			// add row ids corresponding to keys needed
+			// filtration based on what's typed in each key
 			row = document.createElement(`tr`);
 			this._columns.forEach((u, j, b) => {
 				cell = document.createElement(`td`);
@@ -93,7 +95,19 @@ export class table<T>
 		// add section for sortation with header
 	};
 
+	private build_data()
+	{
+		// filter data given
+		// sort table as needed with given filter
+		// pagnate based on given number of entries
+		// use this._for_display as array to build off
+		// if none of the properties above is active, use the current
+		// this._data
+		;
+	};
 	// views per page, which one is active
+
+	private _for_display : T[] | Map<string, T>;
 	private _main : HTMLTableElement;
 	private _header : HTMLTableSectionElement;
 	private _body : HTMLTableSectionElement;
