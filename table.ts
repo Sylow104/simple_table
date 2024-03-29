@@ -85,6 +85,7 @@ export class table<T>
 				cell = document.createElement(`td`);
 				let to_input = u.accessor(v);
 				cell.innerHTML = `${to_input}`;
+				//cell.style = this._cell_style;
 
 				row.insertAdjacentElement(`beforeend`, cell);
 			});
