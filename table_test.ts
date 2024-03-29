@@ -33,7 +33,7 @@ function init()
 			return `${q.a}`;
 		},
 		comparator : (a, b) => {
-			return 0;
+			return b._data.a - a._data.a;
 		}
 	}, {
 		label : `world`,

@@ -9,7 +9,7 @@ export interface column<T>
 {
 	label : string;
 	accessor : ((obj : T) => any);
-	comparator? : ((a : T, b : T) => number);
+	comparator? : ((a : row<T>, b : row<T>) => number);
 	styler? : ((a : T, _in : HTMLTableCellElement) => void);
 	// add sort function?
 	// add filter function?
@@ -88,7 +88,7 @@ class row<T>
 
 	private _tree_mode : boolean;
 	private _children : row<T>[];
-	private _data : T;
+	readonly _data : T;
 	private _row : HTMLTableRowElement;
 };
 
@@ -139,10 +139,17 @@ export class table<T>
 		};
 
 		row.innerHTML = "";
+		// need to add sort buttons, onclick shuffle the rows
+		//
 		let cell : HTMLTableCellElement;
 		this._columns.forEach((v, i, a) => {
 			cell = document.createElement(`th`);
 			cell.innerHTML = v.label;
+			cell.onclick = () => {
+				alert(`testing sort with field: ${v.label}`);
+				this._rows.sort(v.comparator);
+				this.paint_body();
+			};
 			row.insertAdjacentElement(`beforeend`, cell);
 		});
 	};
