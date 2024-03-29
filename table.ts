@@ -109,7 +109,7 @@ export class table<T>
 
 	set columns(info : column<T>[])
 	{
-		this.columns = [];
+		this._columns = [];
 		this._columns.push(...info);
 	};
 
