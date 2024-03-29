@@ -21,17 +21,17 @@ export interface column<T>
 // public _data, instead of accessor to _data
 class row<T>
 {
-	constructor(_a : T, id_accessor? : (a : T) => string)
+	constructor(_a : T, children_accessor? : (a : T) => T[])
 	{
 		this._data = _a;
 		// generate inner html row
 		this._row = document.createElement(`tr`);
-		if (id_accessor) {
-			this._row.id = id_accessor(this._data);
+		
+		if (children_accessor) {
+			this.build_children(children_accessor);
 		};
 	};
 
-	// add either inline css or class css TODO
 	set fields(columns : column<T>[])
 	{
 		this._row.innerHTML = ``;
@@ -54,6 +54,13 @@ class row<T>
 
 	get row() : HTMLTableRowElement
 	{
+		/*
+		let to_ret_children : HTMLTableRowElement[] = [];
+		if (this._tree_mode) {
+			to_ret_children.push(...this._children.map((v, i, a) => {return v.row}).flat());
+		};
+		return [this._row, ...to_ret_children];
+		*/
 		return this._row;
 	};
 
@@ -62,80 +69,33 @@ class row<T>
 		return this._row.id ?? "";
 	};
 
-	private _data : T;
-	private _row : HTMLTableRowElement;
-};
-
-// if we convert map to an array, then sorting is easier
-class data_store<T>
-{
-	constructor()
+	toggle_visibility()
 	{
 		;
 	};
 
-	set data(_in : T[])
+
+	private build_children(accessor : (a : T) => T[])
 	{
-		// generates the corresponding rows;
-		this._data.push(..._in);
+		let entry : row<T>;
+		this._children = accessor(this._data).map((v, i, a) =>
+		{
+			entry = new row<T>(v);
+			entry.build_children(accessor);
+			return entry;
+		});
 	};
 
-	clear_data()
-	{
-		this._data = [];
-	};
-
-	clear_filter()
-	{
-		this._data = [];
-	};
-
-	set columns(_in : column<T>[])
-	{
-		//
-		return;
-	};
-
-	// filter data by given requirements
-	// sort data by keys given
-	// both functions must return true or throw error otherwise
-
-	// if pred returns true, include
-	// else exclude
-	filter(predicate : (v : T, i : number, a : T[]) => boolean)
-	{
-		this._prep = this._prep.filter(predicate);
-	};
-
-	// reverse of filter
-	unfilter(predicate : (v : T, i : number, a : T[]) => boolean)
-	{
-		
-	};
-
-	set sort(func : ((a : T, b : T) => number))
-	{
-		this._prep.push(...this._data);
-		this._prep.sort(func);
-	};
-
-	*rows() : any
-	{
-		yield 0;
-	};
-
-	private a : string;
-	private _data : T[] = [];
-	private _prep : T[] = [];
-	private _columns : column<T>[] = [];
+	private _tree_mode : boolean;
+	private _children : row<T>[];
+	private _data : T;
+	private _row : HTMLTableRowElement;
 };
-
-
 
 export class table<T>
 {
 	// maybe use div element here instead
-	constructor(main : HTMLTableElement, tree_accessor? : ((q : T) => _arr<T>))
+	constructor(main : HTMLTableElement, tree_accessor? : ((q : T) => T[]))
 	{
 		this._main = main;
 		this._main.innerHTML = "";
@@ -147,24 +107,21 @@ export class table<T>
 		this._tree_accessor = tree_accessor;
 	};
 
-	add_column(info : column<T>)
+	set columns(info : column<T>[])
 	{
-		this._columns.push(info);
+		this.columns = [];
+		this._columns.push(...info);
 	};
 
-	set style(src : string)
+	set data(src : T[])
 	{
-		this._style = src;
-	};
-
-	set cell_style(src : string)
-	{
-		this._cell_style = src;
-	};
-
-	set data(src : _arr<T>)
-	{
-		this._data = src;
+		this._rows = [];
+		let new_row : row<T>;
+		src.forEach((v, i, a) => {
+			new_row = new row<T>(v);
+			new_row.fields = this._columns;
+			this._rows.push(new_row);
+		});
 	};
 
 	paint()
@@ -194,30 +151,20 @@ export class table<T>
 
 	private paint_body() // flat style
 	{
+		
 		this._body.innerHTML = "";
-		let row : HTMLTableRowElement;
-		let cell : HTMLTableCellElement;
-		this._data.forEach((v, i, a) => {
-			// add row ids corresponding to keys needed
-			// filtration based on what's typed in each key
-			row = document.createElement(`tr`);
-			this._columns.forEach((u, j, b) => {
-				cell = document.createElement(`td`);
-				let to_input = u.accessor(v);
-				cell.innerHTML = `${to_input}`;
-				cell.style.cssText = this._cell_style;
-
-				row.insertAdjacentElement(`beforeend`, cell);
-			});
-
-			this._body.insertAdjacentElement(`beforeend`, row);
+		this._rows.forEach((v, i, a) => {
+			this._body.insertAdjacentElement(`beforeend`, v.row);
 		});
+		
 		// add section for pagnation
 		// add section for sortation with header
+
 	};
 
 	private paint_body_tree() // tree style
 	{
+		/*
 		if (!this._tree_accessor) {
 			this.paint_body();
 			return;
@@ -230,7 +177,7 @@ export class table<T>
 			// ditto for properties as for flat style
 			;
 		});
-
+		*/
 	};
 
 	private build_data()
@@ -245,14 +192,13 @@ export class table<T>
 	};
 	// views per page, which one is active
 
-	private _tree_accessor : ((ob : T) => _arr<T>);
-	private _for_display : _arr<T>;
+	private _rows : row<T>[];
+	private _tree_accessor? : ((ob : T) => any);
 	private _main : HTMLTableElement;
 	private _header : HTMLTableSectionElement;
 	private _body : HTMLTableSectionElement;
 	private _style : string;
 	private _cell_style : string;
 	private _columns : column<T>[];
-	private _data : _arr<T>;
 	private _max_per_page : number;
 };

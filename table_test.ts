@@ -1,4 +1,4 @@
-import {column, table, _arr} from './table';
+import {column, table} from './table';
 
 interface b
 {
@@ -22,17 +22,12 @@ let to_use : b[] = [
 	]},
 ];
 
-function b_tree_accessor(a : b) : _arr<b>
-{
-	return a.children;
-};
-
 function init()
 {
 	tbl_ele = document.createElement(`table`);
 	tbl = new table<b>(tbl_ele);
 
-	tbl.add_column({
+	tbl.columns = [{
 		label : `hello`,
 		accessor : (q) => {
 			return `${q.a}`;
@@ -40,9 +35,7 @@ function init()
 		comparator : (a, b) => {
 			return 0;
 		}
-	});
-
-	tbl.add_column({
+	}, {
 		label : `world`,
 		accessor : (q) => {
 			return q.q;
@@ -50,7 +43,7 @@ function init()
 		comparator : (a, b) => {
 			return 0;
 		}
-	});
+	}];
 	tbl.data = to_use;
 	document.body.insertAdjacentElement(`afterbegin`, tbl_ele);
 };
