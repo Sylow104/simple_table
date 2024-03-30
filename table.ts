@@ -11,10 +11,12 @@ export interface column<T>
 	accessor : ((obj : T) => any);
 	comparator? : ((a : row<T>, b : row<T>) => number);
 	styler? : ((a : T, _in : HTMLTableCellElement) => void);
+	group_by? : any;
 	is_ascending? : boolean;
-	// add sort function?
-	// add filter function?
 };
+
+// https://stackoverflow.com/questions/55446744/function-to-group-numbers-of-similar-range-together
+// for grouping numbers TODO
 
 // we could not use accessor functions for the data inside
 // but to be on the safe side, we will use them
@@ -96,14 +98,20 @@ class row<T>
 export class table<T>
 {
 	// maybe use div element here instead
-	constructor(main : HTMLTableElement, tree_accessor? : ((q : T) => T[]))
+	constructor(main : HTMLDivElement, tree_accessor? : ((q : T) => T[]))
 	{
 		this._main = main;
 		this._main.innerHTML = "";
+
+		this._options = document.createElement(`div`);
+		this._table = document.createElement(`table`);
 		this._body = document.createElement(`tbody`);
 		this._header = document.createElement(`thead`);
-		this._main.insertAdjacentElement(`afterbegin`, this._body);
-		this._main.insertAdjacentElement(`afterbegin`, this._header);
+
+		this._table.insertAdjacentElement(`beforeend`, this._header);
+		this._table.insertAdjacentElement(`beforeend`, this._body);
+		this._main.insertAdjacentElement(`afterbegin`, this._options);
+		this._main.insertAdjacentElement(`afterbegin`, this._table);
 		this._tree_accessor = tree_accessor;
 	};
 
@@ -140,8 +148,6 @@ export class table<T>
 		};
 
 		row.innerHTML = "";
-		// need to add sort buttons, onclick shuffle the rows
-		//
 		let cell : HTMLTableCellElement;
 		this._columns.forEach((v, i, a) => {
 			if (!v.is_ascending) {
@@ -149,8 +155,11 @@ export class table<T>
 			};
 			cell = document.createElement(`th`);
 			cell.innerHTML = v.label;
+			// we may need to add a label to make a drop down menu
+			// OR we will have to dynamically make a list of common 
+			// prefixes//domain ranges in the summary area
 			cell.onclick = () => {
-				alert(`testing sort with field: ${v.label}`);
+				//alert(`testing sort with field: ${v.label}`);
 				if (!v.is_ascending) {
 					this._rows.sort(v.comparator);
 				} else {
@@ -172,7 +181,6 @@ export class table<T>
 		});
 		
 		// add section for pagnation
-		// add section for sortation with header
 
 	};
 
@@ -206,9 +214,15 @@ export class table<T>
 	};
 	// views per page, which one is active
 
+	// for pagnation, maybe multiple <tbody>'s will work
+	// display one, dont display the others
+	// on the footer of the table?
+	// left ## of ## rows, middle page ## of ##, right: sequence and current position
+	private _options : HTMLDivElement;
 	private _rows : row<T>[];
 	private _tree_accessor? : ((ob : T) => any);
-	private _main : HTMLTableElement;
+	private _main : HTMLDivElement;
+	private _table : HTMLTableElement;
 	private _header : HTMLTableSectionElement;
 	private _body : HTMLTableSectionElement;
 	private _cell_style : string;

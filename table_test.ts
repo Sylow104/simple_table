@@ -8,7 +8,7 @@ interface b
 	children : b[];
 };
 
-let tbl_ele : HTMLTableElement;
+let tbl_ele : HTMLDivElement;
 let tbl : table<b>;
 let to_use : b[] = [
 	{a : 2, q : `this`, r : `rat`, children : []},
@@ -24,7 +24,7 @@ let to_use : b[] = [
 
 function init()
 {
-	tbl_ele = document.createElement(`table`);
+	tbl_ele = document.createElement(`div`);
 	tbl = new table<b>(tbl_ele);
 
 	tbl.columns = [{
