@@ -11,6 +11,7 @@ export interface column<T>
 	accessor : ((obj : T) => any);
 	comparator? : ((a : row<T>, b : row<T>) => number);
 	styler? : ((a : T, _in : HTMLTableCellElement) => void);
+	is_ascending? : boolean;
 	// add sort function?
 	// add filter function?
 };
@@ -143,11 +144,19 @@ export class table<T>
 		//
 		let cell : HTMLTableCellElement;
 		this._columns.forEach((v, i, a) => {
+			if (!v.is_ascending) {
+				v.is_ascending = false;
+			};
 			cell = document.createElement(`th`);
 			cell.innerHTML = v.label;
 			cell.onclick = () => {
 				alert(`testing sort with field: ${v.label}`);
-				this._rows.sort(v.comparator);
+				if (!v.is_ascending) {
+					this._rows.sort(v.comparator);
+				} else {
+					this._rows.sort(v.comparator).reverse();
+				};
+				v.is_ascending = !v.is_ascending;
 				this.paint_body();
 			};
 			row.insertAdjacentElement(`beforeend`, cell);
