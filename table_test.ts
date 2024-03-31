@@ -20,6 +20,18 @@ let to_use : b[] = [
 		]},
 		
 	]},
+	{a : 1666, q : `this`, r : `rat`, children : []},
+	{a : 2049, q : `crack`, r : `sad`, children : []},
+	{a : 901, q : `wide`, r : `usher`, children : []},
+	{a : 578, q : `interest`, r : `pen`, children : []},
+	{a : 45, q : `rest`, r : `long`, children : []},
+	{a : -1, q : `blood`, r : `coffee`, children : []},
+	{a : 10.49, q : `clang`, r : `gear`, children : []},
+	{a : 151, q : `snake`, r : `trap`, children : []},
+	{a : 3, q : `early`, r : `night`, children : []},
+	{a : 64, q : `understand`, r : `tropical`, children : []},
+	{a : 731.09, q : `jingle`, r : `gong`, children : []},
+	{a : 151, q : `young`, r : `warp`, children : []},
 ];
 
 function init()
