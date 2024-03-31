@@ -32,6 +32,15 @@ let to_use : b[] = [
 	{a : 64, q : `understand`, r : `tropical`, children : []},
 	{a : 731.09, q : `jingle`, r : `gong`, children : []},
 	{a : 151, q : `young`, r : `warp`, children : []},
+
+	{a : 46, q : `rest`, r : `long`, children : []},
+	{a : -14, q : `blood`, r : `coffee`, children : []},
+	{a : 12.49, q : `clang`, r : `gear`, children : []},
+	{a : 159, q : `snake`, r : `trap`, children : []},
+	{a : 8, q : `early`, r : `night`, children : []},
+	{a : 65, q : `understand`, r : `tropical`, children : []},
+	{a : 22.4, q : `jingle`, r : `gong`, children : []},
+	{a : 0.442, q : `young`, r : `warp`, children : []},
 ];
 
 function init()

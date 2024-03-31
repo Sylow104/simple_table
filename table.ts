@@ -212,9 +212,13 @@ class view<T>
 	constructor(main : HTMLTableElement, avail_sizes : number[] = [10, 20, 50, 100])
 	{
 		this._main = main;
+		this._colgroups = document.createElement(`colgroup`);
 		this._header = document.createElement(`thead`);
+		this._footer = document.createElement(`tfoot`);
 
+		this._main.insertAdjacentElement(`beforeend`,this._colgroups);
 		this._main.insertAdjacentElement(`beforeend`, this._header);
+		this._main.insertAdjacentElement(`beforeend`, this._footer);
 		this._sizes = avail_sizes;
 	};
 
@@ -233,14 +237,6 @@ class view<T>
 	{
 		this._columns = [];
 		this._columns.push(...info);
-	};
-
-	build()
-	{
-		// we need the following
-		// div - ## of ## units (# page of # pages)
-		// div - dropdown of # of units max to display per pg
-		// div - (prev) 1 ... (x - 2) (x - 1) x (x + 1) (x + 2) ... n (next)
 	};
 
 	page_selector_build()
@@ -277,21 +273,31 @@ class view<T>
 
 	};
 
-	rebuild(index : number = 10)
+	set size(input : number)
+	{
+		this._current_size = input;
+	};
+
+	rebuild()
 	{
 		this.build_header();
-		this.build_bodies(index);
+		this.build_bodies();
+		this.build_footer();
 	};
 
 	private build_header()
 	{
+		/*
 		let row = this._header.querySelector(`tr`);
 		if (!row) {
 			row = document.createElement(`tr`);
 			this._header.insertAdjacentElement(`afterbegin`, row);
 		};
+		*/
 
-		row.innerHTML = "";
+		this._header.innerHTML = "";
+		this._colgroups.innerHTML = "";
+		let col : HTMLTableColElement;
 		let sort_header : sort_th<T>;
 		this._columns.forEach((v, i, a) => {
 			sort_header = new sort_th<T>(v.label);
@@ -307,8 +313,14 @@ class view<T>
 						break;
 				}
 				this.build_bodies();
+				//this.build_footer();
 			};
-			row.insertAdjacentElement(`beforeend`, sort_header.th);
+			this._header.insertAdjacentElement(`beforeend`, sort_header.th);
+
+			
+			col = document.createElement(`col`);
+			this._colgroups.insertAdjacentElement(`beforeend`, col);
+			
 		});
 	};
 
@@ -316,7 +328,7 @@ class view<T>
 	// then when calling a page, hides the other rows but the ones tagged with the
 	// called page
 	// use default value of 10 results per page
-	private build_bodies(index : number = 10)
+	private build_bodies()
 	{
 		// first clear out all tbodys
 		this._bodies = [];
@@ -327,7 +339,7 @@ class view<T>
 		//let size = this._sizes[index];
 		let to_push : HTMLTableSectionElement;
 		this._rows.forEach((v, i, a) => {
-			if (i % index === 0) {
+			if (i % this._current_size === 0) {
 				to_push = document.createElement(`tbody`);
 				this._bodies.push(to_push);
 			}
@@ -336,19 +348,67 @@ class view<T>
 		});
 
 		// paint the bodies
+
 		this._bodies.forEach((v, i, a) => {
-			this._main.insertAdjacentElement(`beforeend`, v);
+			v.style.display = "none";
+			this._footer.insertAdjacentElement(`beforebegin`, v);
 		});
+
+		// keep current table position even if it we switch
+		this.switch_view(this._bodies[this._last_index]);
+	};
+
+	private build_footer()
+	{
+		//let num_pages = this._bodies.length;
+		//let num_rows = this._rows.length;
+		let row : HTMLTableRowElement = this._footer.querySelector(`tr`);
+		let cell : HTMLTableCellElement = this._footer.querySelector(`td`);
+		if (!row) {
+			row = document.createElement(`tr`);
+			cell = document.createElement(`td`);
+			
+			//cell.scope = `column`;
+		}
+		// build pagnation symbols here
+		let page_select_elements : HTMLAnchorElement[] = [];
+		let cur_page : HTMLAnchorElement;
+		this._bodies.forEach((v, i, a) => {
+			cur_page = document.createElement(`a`);
+			//
+			cur_page.innerHTML = ` ${i + 1} `;
+			//cur_page.style.flex = `auto`;
+			cur_page.onclick = () => {
+				this.switch_view(v);
+				this._last_index = i;
+			};
+			//
+			page_select_elements.push(cur_page);
+		});
+
+		// ensure cell is empty before going onwards
+		cell.innerHTML = "";
+		page_select_elements.forEach((v, i, a) => {
+			cell.insertAdjacentElement(`beforeend`, v);
+		});
+		cell.colSpan = this._columns.length;
+
+		//cell.innerHTML = `${num_pages} tables & ${num_rows} rows`;
+		row.insertAdjacentElement(`beforeend`, cell);
+		this._footer.insertAdjacentElement(`beforeend`, row);
+
 	};
 
 	private switch_view(incoming : HTMLTableSectionElement)
 	{
-		this._current_body.style.display = "none";
+		let outgoing = this._current_body;
 		this._current_body = incoming;
-		this._current_body.style.display = "block";
+		if (outgoing) {
+			outgoing.style.display = "none";
+		};
+		this._current_body.style.display = "";
 
 	};
-		
 
 	// controls what rows are viewed, and provides a 
 	// interface to control how many units there can be
@@ -357,14 +417,17 @@ class view<T>
 	private _bodies : HTMLTableSectionElement[];
 
 	private _main : HTMLTableElement;
+	private _colgroups : HTMLTableColElement;
 	private _header : HTMLTableSectionElement;
+	private _footer : HTMLTableSectionElement;
 	private _current_body : HTMLTableSectionElement;
 
 	private _columns : column<T>[];
 	private _rows : row<T>[] = [];
+	private _current_size : number = 10;
 	private _sizes : number[];
 
-	private _last_sort_cell : HTMLTableCellElement;
+	private _last_index : number = 0;
 };
 
 export class table<T>
