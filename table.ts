@@ -83,48 +83,6 @@ class row<T>
 	private _row : HTMLTableRowElement;
 };
 
-// ask this function to generate your body arrays
-class tpages<T>
-{
-	constructor()
-	{
-		
-	};
-
-
-	add(to_add : T[])
-	{
-		;
-	};
-
-	private _num_selected_array : number[];
-};
-
-
-// cannot be less than 10
-function pages<T>(data : row<T>[], num_per_page : number) : HTMLTableSectionElement[]
-{
-	let to_ret : HTMLTableSectionElement[] = [];
-	if (num_per_page < 10) {
-		// alert here
-		return to_ret;
-	};
-
-	let j : number = 0;
-	let page : HTMLTableSectionElement = document.createElement(`tbody`);
-	data.forEach((v, i, a) => {
-		page.insertAdjacentElement(`beforeend`, v.row);
-		j++;
-		if (j >= num_per_page) {
-			to_ret.push(page);
-			page = document.createElement(`tbody`);
-			j = 0;
-		};
-	});
-
-	return to_ret;
-};
-
 class filter<T>
 {
 	constructor(cols : column<T>[])
@@ -237,40 +195,6 @@ class view<T>
 	{
 		this._columns = [];
 		this._columns.push(...info);
-	};
-
-	page_selector_build()
-	{
-		// div - (prev) 1 ... (x - 2) (x - 1) x (x + 1) (x + 2) ... n (next)
-		// max 7 entries as seen above
-		let div : HTMLDivElement = document.createElement(`div`);
-
-		// fixed element 1
-		// fixed element ...
-		// div elements of inbetween numbers
-		// fixed element ...
-		// fixed element n
-
-		// case of n = 1
-		let num_pages = pages.length;
-		if (num_pages < 1 ) {
-			return;
-		} else if (num_pages === 1) {
-			div.innerHTML = "1";
-		} else { // for cases 2 and higher
-			let ele : HTMLAnchorElement ;
-			this._bodies.forEach((v, i, a) => {
-				ele = document.createElement(`a`);
-				ele.innerHTML = `${i+1}`;
-				ele.onclick = () => {
-					this.switch_view(v);
-				};
-			});
-		};
-
-		// build the contracted (...) sections later
-
-
 	};
 
 	set size(input : number)
