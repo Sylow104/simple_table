@@ -57,19 +57,7 @@ class row<T>
 
 	get row() : HTMLTableRowElement
 	{
-		/*
-		let to_ret_children : HTMLTableRowElement[] = [];
-		if (this._tree_mode) {
-			to_ret_children.push(...this._children.map((v, i, a) => {return v.row}).flat());
-		};
-		return [this._row, ...to_ret_children];
-		*/
 		return this._row;
-	};
-
-	get id()
-	{
-		return this._row.id ?? "";
 	};
 
 	toggle_visibility()
@@ -95,30 +83,139 @@ class row<T>
 	private _row : HTMLTableRowElement;
 };
 
-export class table<T>
+// ask this function to generate your body arrays
+class tpages<T>
 {
-	// maybe use div element here instead
-	constructor(main : HTMLDivElement, tree_accessor? : ((q : T) => T[]))
+	constructor()
 	{
-		this._main = main;
-		this._main.innerHTML = "";
-
-		this._options = document.createElement(`div`);
-		this._table = document.createElement(`table`);
-		this._body = document.createElement(`tbody`);
-		this._header = document.createElement(`thead`);
-
-		this._table.insertAdjacentElement(`beforeend`, this._header);
-		this._table.insertAdjacentElement(`beforeend`, this._body);
-		this._main.insertAdjacentElement(`afterbegin`, this._options);
-		this._main.insertAdjacentElement(`afterbegin`, this._table);
-		this._tree_accessor = tree_accessor;
+		
 	};
 
-	set columns(info : column<T>[])
+
+	add(to_add : T[])
 	{
-		this._columns = [];
-		this._columns.push(...info);
+		;
+	};
+
+	private _num_selected_array : number[];
+};
+
+
+// cannot be less than 10
+function pages<T>(data : row<T>[], num_per_page : number) : HTMLTableSectionElement[]
+{
+	let to_ret : HTMLTableSectionElement[] = [];
+	if (num_per_page < 10) {
+		// alert here
+		return to_ret;
+	};
+
+	let j : number = 0;
+	let page : HTMLTableSectionElement = document.createElement(`tbody`);
+	data.forEach((v, i, a) => {
+		page.insertAdjacentElement(`beforeend`, v.row);
+		j++;
+		if (j >= num_per_page) {
+			to_ret.push(page);
+			page = document.createElement(`tbody`);
+			j = 0;
+		};
+	});
+
+	return to_ret;
+};
+
+class filter<T>
+{
+	constructor(cols : column<T>[])
+	{
+		;
+	};
+};
+
+enum sort_state
+{
+	INERT = "=",
+	ASCENDING = "^",
+	DESCENDING = "_"
+};
+
+class sort_th<T>
+{
+	constructor(label : string)
+	{
+		this._cell = document.createElement(`th`);
+		this._notification = document.createElement(`a`);
+		
+		// styling
+		this._notification.style.userSelect = `none`;
+
+		this._cell.innerHTML += `${label}`;
+		this._cell.insertAdjacentElement(`beforeend`, this._notification);
+
+		this._notification.onclick = () => {
+			this.cycle();
+		};
+		this.notification_change();
+	};
+
+	get th() : HTMLTableCellElement
+	{
+		return this._cell;
+	};
+
+	get state() : sort_state
+	{
+		return this._state;
+	};
+
+	set onclick(cbf : (state : sort_state) => any)
+	{
+		this._notification.onclick = () => {
+			this.cycle();
+			cbf(this._state);
+		};
+	};
+
+	private cycle()
+	{
+		switch (this._state) {
+			default:
+			case sort_state.INERT:
+				this._state = sort_state.ASCENDING;
+				break;
+			case sort_state.ASCENDING:
+				this._state = sort_state.DESCENDING;
+				break;
+			case sort_state.DESCENDING:
+				this._state = sort_state.INERT;
+				break;
+		};
+		this.notification_change();
+	};
+
+	private notification_change()
+	{
+		this._notification.innerHTML = `${this._state}`;
+	};
+
+	//private _rows : row<T>[];
+	private _cell : HTMLTableCellElement;
+	private _notification : HTMLAnchorElement;
+	private _state : sort_state = sort_state.INERT;
+};
+
+// preloads the tables into the <table> tag
+// toggle them by onclick event from the page selector based on the pagnation
+class view<T>
+{
+	constructor(main : HTMLTableElement, avail_sizes : number[] = [10, 20, 50, 100])
+	{
+		this._main = main;
+		this._header = document.createElement(`thead`);
+
+		this._main.insertAdjacentElement(`beforeend`, this._header);
+		this._sizes = avail_sizes;
 	};
 
 	set data(src : T[])
@@ -132,15 +229,62 @@ export class table<T>
 		});
 	};
 
-	paint()
+	set columns(info : column<T>[])
 	{
-		this.paint_header();
-		this.paint_body();
+		this._columns = [];
+		this._columns.push(...info);
 	};
 
-	private paint_header()
+	build()
 	{
-		// ask if we need to repaint the headers
+		// we need the following
+		// div - ## of ## units (# page of # pages)
+		// div - dropdown of # of units max to display per pg
+		// div - (prev) 1 ... (x - 2) (x - 1) x (x + 1) (x + 2) ... n (next)
+	};
+
+	page_selector_build()
+	{
+		// div - (prev) 1 ... (x - 2) (x - 1) x (x + 1) (x + 2) ... n (next)
+		// max 7 entries as seen above
+		let div : HTMLDivElement = document.createElement(`div`);
+
+		// fixed element 1
+		// fixed element ...
+		// div elements of inbetween numbers
+		// fixed element ...
+		// fixed element n
+
+		// case of n = 1
+		let num_pages = pages.length;
+		if (num_pages < 1 ) {
+			return;
+		} else if (num_pages === 1) {
+			div.innerHTML = "1";
+		} else { // for cases 2 and higher
+			let ele : HTMLAnchorElement ;
+			this._bodies.forEach((v, i, a) => {
+				ele = document.createElement(`a`);
+				ele.innerHTML = `${i+1}`;
+				ele.onclick = () => {
+					this.switch_view(v);
+				};
+			});
+		};
+
+		// build the contracted (...) sections later
+
+
+	};
+
+	rebuild(index : number = 10)
+	{
+		this.build_header();
+		this.build_bodies(index);
+	};
+
+	private build_header()
+	{
 		let row = this._header.querySelector(`tr`);
 		if (!row) {
 			row = document.createElement(`tr`);
@@ -148,84 +292,124 @@ export class table<T>
 		};
 
 		row.innerHTML = "";
-		let cell : HTMLTableCellElement;
+		let sort_header : sort_th<T>;
 		this._columns.forEach((v, i, a) => {
-			if (!v.is_ascending) {
-				v.is_ascending = false;
+			sort_header = new sort_th<T>(v.label);
+			sort_header.onclick = (st) => {
+				switch (st) {
+					case sort_state.ASCENDING:
+						this._rows = this._rows.sort(v.comparator);
+						break;
+					case sort_state.DESCENDING:
+						this._rows = this._rows.sort(v.comparator).reverse();
+						break;
+					default:
+						break;
+				}
+				this.build_bodies();
 			};
-			cell = document.createElement(`th`);
-			cell.innerHTML = v.label;
-			// we may need to add a label to make a drop down menu
-			// OR we will have to dynamically make a list of common 
-			// prefixes//domain ranges in the summary area
-			cell.onclick = () => {
-				//alert(`testing sort with field: ${v.label}`);
-				if (!v.is_ascending) {
-					this._rows.sort(v.comparator);
-				} else {
-					this._rows.sort(v.comparator).reverse();
-				};
-				v.is_ascending = !v.is_ascending;
-				this.paint_body();
-			};
-			row.insertAdjacentElement(`beforeend`, cell);
+			row.insertAdjacentElement(`beforeend`, sort_header.th);
 		});
 	};
 
-	private paint_body() // flat style
+	// what if we already load the rows into the DOM, tagged with pages
+	// then when calling a page, hides the other rows but the ones tagged with the
+	// called page
+	// use default value of 10 results per page
+	private build_bodies(index : number = 10)
 	{
-		
-		this._body.innerHTML = "";
+		// first clear out all tbodys
+		this._bodies = [];
+		this._main.querySelectorAll(`tbody`).forEach((v, i, a) => {
+			this._main.removeChild(v);
+		});
+
+		//let size = this._sizes[index];
+		let to_push : HTMLTableSectionElement;
 		this._rows.forEach((v, i, a) => {
-			this._body.insertAdjacentElement(`beforeend`, v.row);
+			if (i % index === 0) {
+				to_push = document.createElement(`tbody`);
+				this._bodies.push(to_push);
+			}
+
+			to_push.insertAdjacentElement(`beforeend`, v.row);
 		});
+
+		// paint the bodies
+		this._bodies.forEach((v, i, a) => {
+			this._main.insertAdjacentElement(`beforeend`, v);
+		});
+	};
+
+	private switch_view(incoming : HTMLTableSectionElement)
+	{
+		this._current_body.style.display = "none";
+		this._current_body = incoming;
+		this._current_body.style.display = "block";
+
+	};
 		
-		// add section for pagnation
 
-	};
+	// controls what rows are viewed, and provides a 
+	// interface to control how many units there can be
+	// note the tables must be already loaded into the class or reloaded as needed
+	private controls : HTMLDivElement;
+	private _bodies : HTMLTableSectionElement[];
 
-	private paint_body_tree() // tree style
+	private _main : HTMLTableElement;
+	private _header : HTMLTableSectionElement;
+	private _current_body : HTMLTableSectionElement;
+
+	private _columns : column<T>[];
+	private _rows : row<T>[] = [];
+	private _sizes : number[];
+
+	private _last_sort_cell : HTMLTableCellElement;
+};
+
+export class table<T>
+{
+	constructor(main : HTMLDivElement, tree_accessor? : ((q : T) => T[]))
 	{
-		/*
-		if (!this._tree_accessor) {
-			this.paint_body();
-			return;
-		}
+		this._main = main;
+		this._main.innerHTML = "";
 
-		this._body.innerHTML = "";
-		let row : HTMLTableRowElement;
-		let cell : HTMLTableCellElement;
-		this._data.forEach((v, i, a) => {
-			// ditto for properties as for flat style
-			;
-		});
-		*/
+		this._options = document.createElement(`div`);
+		this._table = document.createElement(`table`);
+
+		this._main.insertAdjacentElement(`afterbegin`, this._options);
+		this._main.insertAdjacentElement(`afterbegin`, this._table);
+
+		this._view = new view<T>(this._table);
 	};
 
-	private build_data()
+	set columns(info : column<T>[])
 	{
-		// filter data given
-		// sort table as needed with given filter
-		// pagnate based on given number of entries
-		// use this._for_display as array to build off
-		// if none of the properties above is active, use the current
-		// this._data
-		;
+		this._view.columns = info;
 	};
-	// views per page, which one is active
+
+	set data(src : T[])
+	{
+		this._view.data = src;
+	};
+
+	paint()
+	{
+		this._view.rebuild();
+	};
 
 	// for pagnation, maybe multiple <tbody>'s will work
 	// display one, dont display the others
 	// on the footer of the table?
 	// left ## of ## rows, middle page ## of ##, right: sequence and current position
 	private _options : HTMLDivElement;
-	private _rows : row<T>[];
-	private _tree_accessor? : ((ob : T) => any);
+	private _view : view<T>;
 	private _main : HTMLDivElement;
 	private _table : HTMLTableElement;
-	private _header : HTMLTableSectionElement;
-	private _body : HTMLTableSectionElement;
-	private _cell_style : string;
-	private _columns : column<T>[];
-	private _max_per_page : number;
+	
+	private _bodies : HTMLTableSectionElement[];
+	// where we add pagnation details
+	
+	private _footer : HTMLDivElement;
+
 };
