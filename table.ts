@@ -178,6 +178,8 @@ class view<T>
 		this._main.insertAdjacentElement(`beforeend`, this._header);
 		this._main.insertAdjacentElement(`beforeend`, this._footer);
 		this._sizes = avail_sizes;
+
+		this._last_index = 0;
 	};
 
 	set data(src : T[])
@@ -237,7 +239,7 @@ class view<T>
 						break;
 				}
 				this.build_bodies();
-				//this.build_footer();
+				this.build_footer();
 			};
 			this._header.insertAdjacentElement(`beforeend`, sort_header.th);
 
