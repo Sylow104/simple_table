@@ -163,6 +163,48 @@ class sort_th<T>
 	private _state : sort_state = sort_state.INERT;
 };
 
+class body_m<T>
+{
+	constructor(to_use : HTMLTableSectionElement)
+	{
+		;
+	};
+
+	set data(src : T[])
+	{
+		;
+	};
+};
+
+class footer_m<T>
+{
+	constructor(to_use : HTMLTableSectionElement)
+	{
+		;
+	};
+};
+
+class header_m<T>
+{
+	constructor(to_use : HTMLTableSectionElement)
+	{
+		;
+	};
+};
+
+class controls<T>
+{
+	constructor(main : HTMLDivElement)
+	{
+		;
+	};
+
+	private _body : body_m<T>;
+	private _header : header_m<T>;
+	private _footer : footer_m<T>;
+	
+};
+
 // preloads the tables into the <table> tag
 // toggle them by onclick event from the page selector based on the pagnation
 class view<T>
