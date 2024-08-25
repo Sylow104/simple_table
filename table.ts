@@ -330,8 +330,8 @@ class view<T>
 	{
 		//let num_pages = this._bodies.length;
 		//let num_rows = this._rows.length;
-		let row : HTMLTableRowElement = this._footer.querySelector(`tr`);
-		let cell : HTMLTableCellElement = this._footer.querySelector(`td`);
+		let row : HTMLTableRowElement = this._footer.querySelector(`tr`)!;
+		let cell : HTMLTableCellElement = this._footer.querySelector(`td`)!;
 		if (!row) {
 			row = document.createElement(`tr`);
 			cell = document.createElement(`td`);
